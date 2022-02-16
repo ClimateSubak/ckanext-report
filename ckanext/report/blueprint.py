@@ -1,12 +1,12 @@
 from builtins import str
 import json
-from flask import Blueprint, request
+from flask import Blueprint, request, make_response
 
 import ckan.plugins.toolkit as t
-import ckan.lib.helpers as helpers
 from jinja2.exceptions import TemplateNotFound
 
 from ckanext.report.report_registry import Report
+import ckanext.report.helpers as helpers
 from ckanext.report.lib import make_csv_from_dicts, ensure_data_is_dicts, anonymise_user_names
 
 import logging
@@ -115,13 +115,15 @@ def view(report_name, organization=None, refresh=False):
             except t.NotAuthorized:
                 t.abort(401)
             filename = 'report_%s.csv' % key
-            t.response.headers['Content-Type'] = 'application/csv'
-            t.response.headers['Content-Disposition'] = str('attachment; filename=%s' % (filename))
-            return make_csv_from_dicts(data['table'])
+            response = make_response(make_csv_from_dicts(data['table']))
+            response.headers['Content-Type'] = 'application/csv'
+            response.headers['Content-Disposition'] = str('attachment; filename=%s' % (filename))
+            return response
         elif format == 'json':
-            t.response.headers['Content-Type'] = 'application/json'
             data['generated_at'] = report_date
-            return json.dumps(data)
+            response = make_response(json.dumps(data))
+            response.headers['Content-Type'] = 'application/json'
+            return response
         else:
             t.abort(400, 'Format not known - try html, json or csv')
 
@@ -139,7 +141,7 @@ def view(report_name, organization=None, refresh=False):
 
 
 report.add_url_rule(u'/report', view_func=index)
-report.add_url_rule(u'/report/<report_name>', view_func=view)
+report.add_url_rule(u'/report/<report_name>', view_func=view, methods=['GET', 'POST'])
 report.add_url_rule(u'/report/<report_name>/<organization>', view_func=view)
 
 

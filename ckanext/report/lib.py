@@ -70,9 +70,9 @@ def percent(numerator, denominator):
 
 def make_csv_from_dicts(rows):
     import csv
-    import cStringIO as StringIO
+    from io import StringIO
 
-    csvout = StringIO.StringIO()
+    csvout = StringIO()
     csvwriter = csv.writer(
         csvout,
         dialect='excel',
@@ -93,7 +93,7 @@ def make_csv_from_dicts(rows):
         items = []
         for header in headers_ordered:
             item = row.get(header, 'no record')
-            if isinstance(item, datetime.datetime):
+            if isinstance(item, datetime):
                 item = item.strftime('%Y-%m-%d %H:%M')
             elif isinstance(item, (int, float, list, tuple)):
                 item = str(item)
