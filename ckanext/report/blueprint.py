@@ -140,7 +140,7 @@ def view(report_name, organization=None, refresh=False):
         'are_some_results': are_some_results})
 
 
-report.add_url_rule(u'/report', view_func=index)
+report.add_url_rule(u'/report', view_func=index, strict_slashes=False)
 report.add_url_rule(u'/report/<report_name>', view_func=view, methods=['GET', 'POST'])
 report.add_url_rule(u'/report/<report_name>/<organization>', view_func=view)
 
