@@ -72,7 +72,9 @@ def report_data_get(context=None, data_dict=None):
 
     report = ReportRegistry.instance().get_report(id)
 
-    data, date = report.get_fresh_report(**options)
+    # data, date = report.get_fresh_report(**options)
+    # Ignore caching now that we use pagination instead
+    data, date = report.get_report_ignore_cache(**options)
 
     return data, date.isoformat()
 

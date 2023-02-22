@@ -3,6 +3,7 @@ from past.builtins import basestring
 import logging
 import copy
 import re
+import datetime
 
 from ckan.plugins.toolkit import asbool
 
@@ -97,11 +98,18 @@ class Report(object):
                                           key, data, convert_json=True)
         model.Session.commit()
         return data, date
+    
+    def get_report_ignore_cache(self, **option_dict):
+        log.info('  Gen for options: %r', option_dict)
+        data = self.generate(**option_dict)
+        return data, datetime.datetime.now()
 
     def get_fresh_report(self, **option_dict):
         from ckanext.report import model as report_model
         entity_name = extract_entity_name(option_dict)
         key = self.generate_key(option_dict)
+        # Temp bypass cache
+        data = None
         data, date = report_model.DataCache.get_if_fresh(
                 entity_name, key, convert_json=True)
         if data is None:

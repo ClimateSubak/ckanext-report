@@ -26,7 +26,7 @@ def index():
     return t.render('report/index.html', extra_vars={'reports': reports})
 
 
-def view(report_name, organization=None, refresh=False):
+def view(report_name, organization=None, refresh=False, page=1):
     try:
         report = t.get_action('report_show')({}, {'id': report_name})
     except t.NotAuthorized:
@@ -48,6 +48,7 @@ def view(report_name, organization=None, refresh=False):
         t.redirect_to(helpers.relative_url_for())
 
     # options
+    report['option_defaults']["page"] = 1
     options = Report.add_defaults_to_options(t.request.params, report['option_defaults'])
     option_display_params = {}
     if 'format' in options:
@@ -75,24 +76,24 @@ def view(report_name, organization=None, refresh=False):
 
     # Alternative way to refresh the cache - not in the UI, but is
     # handy for testing
-    try:
-        refresh = t.asbool(t.request.params.get('refresh'))
-        if 'refresh' in options:
-            options.pop('refresh')
-    except ValueError:
-        refresh = False
+    # try:
+    #     refresh = t.asbool(t.request.params.get('refresh'))
+    #     if 'refresh' in options:
+    #         options.pop('refresh')
+    # except ValueError:
+    #     refresh = False
 
     # Refresh the cache if requested
-    if t.request.method == 'POST' and not format:
-        refresh = True
+    # if t.request.method == 'POST' and not format:
+    #     refresh = True
 
-    if refresh:
-        try:
-            t.get_action('report_refresh')({}, {'id': report_name, 'options': options})
-        except t.NotAuthorized:
-            t.abort(401)
-        # Don't want the refresh=1 in the url once it is done
-        t.redirect_to(helpers.relative_url_for(refresh=None))
+    # if refresh:
+    #     try:
+    #         t.get_action('report_refresh')({}, {'id': report_name, 'options': options})
+    #     except t.NotAuthorized:
+    #         t.abort(401)
+    #     # Don't want the refresh=1 in the url once it is done
+    #     t.redirect_to(helpers.relative_url_for(refresh=None))
 
     # Check for any options not allowed by the report
     for key in options:
